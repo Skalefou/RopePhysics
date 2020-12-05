@@ -30,10 +30,18 @@ unsigned int positiveNumberConvert(signed int number) {
 void clickRelease(sf::RenderWindow& window, signed int ropePositionY[]) {
     if (isMouseLeftReleased()) {
         signed int mouseHeight = CoordsHeight(window);
-        if (sf::Mouse::getPosition(window).x < ropeSize && sf::Mouse::getPosition(window).x >= 0) {
+        if (sf::Mouse::getPosition(window).x < ropeSize && sf::Mouse::getPosition(window).x >= 0 && sf::Mouse::getPosition(window).y > 0 && sf::Mouse::getPosition(window).y < windowHeight) {
             ropePositionY[sf::Mouse::getPosition(window).x] = CoordsHeight(window);
-            for (unsigned int i = 0; i < positiveNumberConvert(CoordsHeight(window)); i++) {
-
+            signed int i = CoordsHeight(window);
+            while (i != 0) {
+                if(sf::Mouse::getPosition(window).x - (CoordsHeight(window) - i) > 0)
+                    ropePositionY[sf::Mouse::getPosition(window).x - (CoordsHeight(window) - i)] = i;
+                if (sf::Mouse::getPosition(window).x + (CoordsHeight(window) - i) < ropeSize)
+                    ropePositionY[sf::Mouse::getPosition(window).x + (CoordsHeight(window) - i)] = i;
+                if (i > 0)
+                    i--;
+                else
+                    i++;
             }
         }
     }
@@ -44,9 +52,8 @@ int main(void) {
     sf::VertexArray rope(sf::Points, ropeSize);
     signed int ropePositionY[ropeSize] = { 0 };
 
-    for (unsigned int i = 0; i < ropeSize; i++) {
+    for (unsigned int i = 0; i < ropeSize; i++)
         rope[i].position = sf::Vector2f((float)i, (float)(windowHeight / 2));
-    }
 
     window.setVerticalSyncEnabled(true);
     while (window.isOpen()) {
@@ -66,7 +73,11 @@ int main(void) {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
             window.close();
 
-        clickRelease(window, ropePositionY);
+       clickRelease(window, ropePositionY);
+
+        
+        for (unsigned int i = 0; i < ropeSize; i++)
+            rope[i].position = sf::Vector2f((float)i, (float)((windowHeight / 2) + ropePositionY[i]));
 
         window.draw(rope);
         window.display();
